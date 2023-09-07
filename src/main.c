@@ -40,6 +40,7 @@ int main(void) {
     clock_t prev = clock();
     kb_Scan();
     bool secondPressed = kb_Data[1] & kb_2nd;
+    bool alphaPressed = kb_Data[6] & kb_Clear;
 
     Vec ball = {0, GFX_LCD_HEIGHT / 2};
 
@@ -49,12 +50,19 @@ int main(void) {
         kb_Scan();
         bool second = kb_Data[1] & kb_2nd;
 
+        bool alpha = kb_Data[2] & kb_Alpha;
+        uint8_t primary = alpha ? 0 : 1;
+        uint8_t secondary = alpha ? 1 : 0;
+
         if (second && !secondPressed) {
-            gfx_FillScreen(WHITE);
-            gfx_SetColor(BLACK);
             ball.x += 10;
+        }
+        if ((alpha != alphaPressed) || (second && !secondPressed)) {
+            gfx_FillScreen(primary);
+            gfx_SetColor(secondary);
             gfx_FillCircle(ball.x, ball.y, 5);
         }
+        alphaPressed = alpha;
         secondPressed = second;
 
         if(kb_On) {
