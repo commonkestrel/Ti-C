@@ -1,0 +1,1 @@
+int floatToStr(float value, char *str, int8_t length);
