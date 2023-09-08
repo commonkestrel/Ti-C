@@ -18,6 +18,12 @@ uint16_t palette[2] =
 #define BLACK 0
 #define WHITE 1
 
+#define PADDLE_HEIGHT 60
+#define PADDLE_WIDTH 10
+// Add 6 pixels of padding to each side
+#define PADDLE_MIN 6
+#define PADDLE_MAX GFX_LCD_HEIGHT - PADDLE_HEIGHT - 6
+
 typedef struct Vec {
     uint16_t x;
     uint16_t y;
@@ -44,8 +50,8 @@ int main(void) {
     bool alphaPressed = kb_Data[6] & kb_Clear;
 
     Ball ball = {{GFX_LCD_WIDTH / 2, GFX_LCD_HEIGHT / 2}, false, true};
-    uint8_t left = GFX_LCD_HEIGHT / 2;
-    uint8_t right = GFX_LCD_HEIGHT / 2;
+    uint8_t left = (GFX_LCD_HEIGHT-PADDLE_HEIGHT) / 2;
+    uint8_t right = (GFX_LCD_HEIGHT-PADDLE_HEIGHT) / 2;
 
     begin();
 
@@ -89,12 +95,12 @@ bool step(float dy, Ball *ball, uint8_t *left, uint8_t *right, uint8_t *primary,
 
     // Move from 1/4 of the screen to 3/4.
     ball->position.x = widthToPixel((sinf(dy) / 4.0f) + 0.5f);
-    ball->position.y = widthToPixel((cosf(dy) / 4.0f) + 0.5f) - GFX_LCD_WIDTH / 2 + GFX_LCD_HEIGHT / 2;
+    // ball->position.y = widthToPixel((cosf(dy) / 4.0f) + 0.5f) - GFX_LCD_WIDTH / 2 + GFX_LCD_HEIGHT / 2;
 
-    if (kb_Data[7] & kb_Up && *left) {
+    if (kb_Data[7] & kb_Up && *left > PADDLE_MIN) {
         *left = *left - 2;
     }
-    if (kb_Data[7] & kb_Down && *left < GFX_LCD_HEIGHT) {
+    if (kb_Data[7] & kb_Down && *left < PADDLE_MAX) {
         *left = *left + 2;
     }
 
@@ -105,8 +111,8 @@ void draw(uint8_t primary, uint8_t secondary, const Ball *ball, uint8_t left, ui
     gfx_FillScreen(secondary);
     gfx_SetColor(primary);
     gfx_FillCircle(ball->position.x, ball->position.y, 5);
-    gfx_Circle(10, left, 5);
-    gfx_Circle(GFX_LCD_WIDTH - 10, right, 5);
+    gfx_FillRectangle(10, left, PADDLE_WIDTH, PADDLE_HEIGHT);
+    gfx_FillRectangle(GFX_LCD_WIDTH - 10 - PADDLE_WIDTH, right, PADDLE_WIDTH, PADDLE_HEIGHT);
 
     gfx_SwapDraw();
 }
